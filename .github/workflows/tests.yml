@@ -11,6 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment: myEnvironments
 
     env:
       EMAIL_YAEL: ${{ secrets.EMAIL_YAEL }}
