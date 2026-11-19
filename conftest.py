@@ -1,8 +1,9 @@
 from pages.base_dummy_pay import BaseDummyPayPage
 import pytest
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
 
 from pages.login_page import LoginPage
+from pages.forgot_password_page import ForgotPasswordPage
 from pages.dashboard_page import DashboardPage
 from pages.wallets_page import WalletsPage
 from pages.send_money_page import SendMoneyPage
@@ -27,10 +28,19 @@ def login_page(page: Page) -> LoginPage:
 
 
 @pytest.fixture
+def forgot_password_page(page: Page) -> ForgotPasswordPage:
+    forgot = ForgotPasswordPage(page)
+    forgot.open()
+    return forgot
+
+
+@pytest.fixture
 def logged_in(page):
     dummyPayPage = BaseDummyPayPage(page)
     dummyPayPage.open()
     dummyPayPage.login_with_valid_credentials()
+    # Wait until the post-login redirect finishes, so the next click isn't lost
+    expect(dummyPayPage.page_heading("Dashboard")).to_be_visible()
     yield dummyPayPage
     # dummyPayPage.logout()
 
