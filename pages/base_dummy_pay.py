@@ -29,8 +29,49 @@ class BaseDummyPayPage(BasePage):
     def sing_in_btn(self) -> Locator:
         return self.page.get_by_role("button", name="Sign in")
 
+    # ---------- Sidebar / account menu (shared by all logged-in pages) ----------
+
+    @property
+    def main_area(self) -> Locator:
+        return self.page.get_by_role("main")
+
+    @property
+    def account_menu_btn(self) -> Locator:
+        return self.page.get_by_role("button", name=re.compile(r"^Account menu"))
+
+    @property
+    def account_menu_profile_item(self) -> Locator:
+        return self.page.get_by_role("menuitem", name="Profile & Settings")
+
+    @property
+    def sign_out_item(self) -> Locator:
+        return self.page.get_by_role("menuitem", name="Sign out")
+
+    def sidebar_link(self, menu_item: str) -> Locator:
+        return self.page.get_by_role("navigation", name="Main").get_by_role("link", name=menu_item, exact=True)
+
+    def page_heading(self, name: str) -> Locator:
+        return self.page.get_by_role("heading", level=1, name=name)
+
+    def open_account_menu(self) -> None:
+        self.account_menu_btn.click()
+
+    def sign_out(self) -> None:
+        self.open_account_menu()
+        self.sign_out_item.click()
+
+    def go_to_profile_from_account_menu(self) -> None:
+        self.open_account_menu()
+        self.account_menu_profile_item.click()
+
+    def select_option(self, combobox: Locator, option: str) -> None:
+        """The site's dropdowns are custom (not <select>): open, then click the option."""
+        combobox.click()
+        self.page.get_by_role("option", name=option).click()
+
+    # ---------- Login ----------
+
     def click_sign_in(self) -> None:
-        print("----Clicking on Sign in button")
         self.sing_in_btn.highlight()
         self.sing_in_btn.click()
     
@@ -41,7 +82,8 @@ class BaseDummyPayPage(BasePage):
 
 
     def navigate_to(self, menu_item: str) -> None:
-        link = self.page.get_by_role("link", name=menu_item)
+        # Only the sidebar link - the Dashboard also has a "Send money" button
+        link = self.sidebar_link(menu_item)
         link.highlight()
         link.click()
         # Verify we landed on the right page

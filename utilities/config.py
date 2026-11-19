@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEFAULT_TIMEOUT_MS = int(os.getenv("DEFAULT_TIMEOUT_MS", "15000"))
+DEFAULT_TIMEOUT_MS = int(os.getenv("DEFAULT_TIMEOUT_MS", "20000"))
 URL_FINANCE_SITE="https://dummypay.vercel.app/"
 
 EMAIL_YAEL = os.getenv("EMAIL_YAEL")
