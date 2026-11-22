@@ -1,4 +1,6 @@
 
+import re
+
 from playwright.sync_api import Locator, Page ,expect
 from pages.base_dummy_pay import BaseDummyPayPage
 
@@ -22,6 +24,17 @@ class PaymentCardsPage(BaseDummyPayPage):
     @property
     def empty_state_text(self) -> Locator:
         return self.main_area.get_by_text("No cards yet")
+
+    @property  # כל הכרטיסים ברשימה
+    def card_items(self) -> Locator:
+        return self.page.get_by_test_id("card-item")
+    
+    # מוצאת כרטיס לפי 3 הפרטים שמוצגים עליו: 4 ספרות אחרונות, שם בעל הכרטיס ותוקף
+    def find_card(self, last4: str, holder: str, expiry: str) -> Locator:
+        return (self.card_items
+                .filter(has_text=last4)
+                .filter(has_text=holder)
+                .filter(has_text=f"Exp {expiry}"))
 
     # ---------- "Add a simulated card" dialog ----------
 
@@ -56,7 +69,25 @@ class PaymentCardsPage(BaseDummyPayPage):
     @property
     def dialog_close_btn(self) -> Locator:
         return self.add_card_dialog.get_by_role("button", name="Close")
+    @property
+    def card_added_toast(self)-> Locator:
+         return self.page.get_by_role("region", name=re.compile("Notifications")).get_by_text("Simulated card added")
 
+    @property
+    def card_removed_toast(self) -> Locator:
+        # הודעה זמנית (toast) שמופיעה אחרי מחיקת כרטיס ונעלמת אחרי כמה שניות
+        return self.page.get_by_role("region", name=re.compile("Notifications")).get_by_text("Card removed.")
+
+    @property
+    def invalid_card_number_message(self)-> Locator:
+        return self.add_card_dialog.get_by_text("Card number is not valid (checksum failed).")
+
+    @property
+    def  invalid_expiry_date_message(self)-> Locator:
+        return self.add_card_dialog.get_by_text("This card has expired.")
+    
+
+   
     # ---------- Actions ----------
 
     def click_add_card(self) -> None:
@@ -74,3 +105,8 @@ class PaymentCardsPage(BaseDummyPayPage):
 
     def click_dialog_add(self) -> None:
         self.dialog_add_btn.click()
+
+    # מוחקת כרטיס לפי 3 הפרטים: לחיצה על Remove בכרטיס ואז אישור בחלון
+    def delete_card(self, last4: str, holder: str, expiry: str) -> None:
+        self.find_card(last4, holder, expiry).first.get_by_role("button", name="Remove").click()
+        self.page.get_by_role("alertdialog").get_by_role("button", name="Remove").click()
