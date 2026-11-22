@@ -66,3 +66,11 @@ class ProfileSettingsPage(BaseDummyPayPage):
 
     def click_change(self) -> None:
         self.change_btn.click()
+
+    # ---------- Read data (return values, no checks) ----------
+
+    # מחזירה את המטבע המועדף שמוגדר בהגדרות: "EUR — Euro" -> "EUR"
+    def get_preferred_currency(self) -> str:
+        """The preferred currency set in Settings: "EUR — Euro" -> "EUR" """
+        text = self.preferred_currency_value.inner_text()   # "EUR — Euro"
+        return text.split()[0]                              # "EUR"

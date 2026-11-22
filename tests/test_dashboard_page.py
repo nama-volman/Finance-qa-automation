@@ -45,7 +45,7 @@ def test_view_all_notifications_opens_notifications_page(dashboard_page):
 
 
 # ==================== Total balance ====================
-
+# ** בפונקציה הפנימית בצענו הוספה של 1 לסכום של כלל הארנקים כדי לבדוק שבדיקת הסטייה לא מגזימה ואז מחקנו את זה כי זאת בדיקה פנימית שהפונקציה ממומשת נכון.
 @pytest.mark.dashboard
 def test_total_balance_equals_sum_of_wallets(dashboard_page):
     # Arrange - collect the data shown on the page
