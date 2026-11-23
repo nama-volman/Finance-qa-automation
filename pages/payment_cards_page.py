@@ -110,3 +110,10 @@ class PaymentCardsPage(BaseDummyPayPage):
     def delete_card(self, last4: str, holder: str, expiry: str) -> None:
         self.find_card(last4, holder, expiry).first.get_by_role("button", name="Remove").click()
         self.page.get_by_role("alertdialog").get_by_role("button", name="Remove").click()
+
+
+    def add_card(self, name: str, number: str, expiry: str, cvv: str)-> None:
+        self.click_add_card()
+        expect(self.add_card_dialog).to_be_visible()
+        self.fill_card_form(name,number,expiry,cvv)
+        self.click_dialog_add()

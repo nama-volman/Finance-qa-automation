@@ -1,3 +1,4 @@
+import re
 
 from playwright.sync_api import Locator, Page ,expect
 from pages.base_dummy_pay import BaseDummyPayPage
@@ -22,6 +23,26 @@ class BankAccountsPage(BaseDummyPayPage):
     @property
     def empty_state_text(self) -> Locator:
         return self.main_area.get_by_text("No bank accounts yet")
+
+    @property  # כל חשבונות הבנק ברשימה
+    def bank_account_items(self) -> Locator:
+        return self.page.get_by_test_id("bank-account-item")
+
+    # מוצאת חשבון בנק לפי שם הבנק ו-4 הספרות האחרונות שמוצגות עליו ("Account •••• 5678")
+    def find_bank_account(self, bank_name: str, last4: str) -> Locator:
+        return (self.bank_account_items
+                .filter(has_text=bank_name)
+                .filter(has_text=f"•••• {last4}"))
+
+    # ---------- Toasts (הודעות זמניות שנעלמות אחרי כמה שניות) ----------
+
+    @property
+    def bank_account_added_toast(self) -> Locator:
+        return self.page.get_by_role("region", name=re.compile("Notifications")).get_by_text("Simulated bank account added.")
+
+    @property
+    def bank_account_removed_toast(self) -> Locator:
+        return self.page.get_by_role("region", name=re.compile("Notifications")).get_by_text("Bank account removed.")
 
     # ---------- "Add a simulated bank account" dialog ----------
 
@@ -61,6 +82,11 @@ class BankAccountsPage(BaseDummyPayPage):
     def dialog_close_btn(self) -> Locator:
         return self.add_bank_account_dialog.get_by_role("button", name="Close")
 
+    @property
+    def invalid_account_number_message(self) -> Locator:
+        # הודעת שגיאה מתחת לשדה מספר החשבון כשהוא לא 4-20 ספרות
+        return self.add_bank_account_dialog.get_by_text("Enter an IBAN or an account number of 4–20 digits.")
+
     # ---------- Actions ----------
 
     def click_add_bank_account(self) -> None:
@@ -80,3 +106,16 @@ class BankAccountsPage(BaseDummyPayPage):
 
     def click_dialog_add(self) -> None:
         self.dialog_add_btn.click()
+
+    # פותחת את הטופס, ממלאת את כל השדות ולוחצת "Add bank account"
+    def add_bank_account(self, holder: str, bank: str, country: str,
+                         currency: str, account_number: str) -> None:
+        self.click_add_bank_account()
+        expect(self.add_bank_account_dialog).to_be_visible()
+        self.fill_bank_account_form(holder, bank, country, currency, account_number)
+        self.click_dialog_add()
+
+    # מוחקת חשבון בנק לפי שם הבנק ו-4 ספרות אחרונות: לחיצה על Remove ואז אישור בחלון
+    def delete_bank_account(self, bank_name: str, last4: str) -> None:
+        self.find_bank_account(bank_name, last4).first.get_by_role("button", name=re.compile("^Remove")).click()
+        self.page.get_by_role("alertdialog").get_by_role("button", name="Remove").click()

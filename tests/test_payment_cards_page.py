@@ -28,22 +28,14 @@ def test_add_card_opens_and_cancel_closes_dialog(payment_cards_page):
 #positive
 @pytest.mark.addCard
 def test_add_new_card_with_valid_details(payment_cards_page):
-    payment_cards_page.page.pause()
-    payment_cards_page.click_add_card()
-    expect(payment_cards_page.add_card_dialog).to_be_visible()
-    payment_cards_page.fill_card_form(CARD_DETAILS["cardholder_name"],CARD_DETAILS["valid_card_number"],CARD_DETAILS["valid_expiry"],CARD_DETAILS["cvv"])
-    payment_cards_page.click_dialog_add()
+    payment_cards_page.add_card(CARD_DETAILS["cardholder_name"],CARD_DETAILS["valid_card_number"],CARD_DETAILS["valid_expiry"],CARD_DETAILS["cvv"])
     expect(payment_cards_page.card_added_toast).to_be_visible()
 
 
 #negative 
 @pytest.mark.addCard
 def test_add_new_card_with_invalid_card_number(payment_cards_page):
-    payment_cards_page.page.pause()
-    payment_cards_page.click_add_card()
-    expect(payment_cards_page.add_card_dialog).to_be_visible()
-    payment_cards_page.fill_card_form(CARD_DETAILS["cardholder_name"],CARD_DETAILS["invalid_card_number"],CARD_DETAILS["valid_expiry"],CARD_DETAILS["cvv"])
-    payment_cards_page.click_dialog_add()
+    payment_cards_page.add_card(CARD_DETAILS["cardholder_name"],CARD_DETAILS["invalid_card_number"],CARD_DETAILS["valid_expiry"],CARD_DETAILS["cvv"])
     expect(payment_cards_page.invalid_card_number_message).to_be_visible()
    
 
@@ -51,11 +43,7 @@ def test_add_new_card_with_invalid_card_number(payment_cards_page):
 #negative 
 @pytest.mark.addCard
 def test_add_new_card_with_invalid_expiry_date(payment_cards_page):
-    payment_cards_page.page.pause()
-    payment_cards_page.click_add_card()
-    expect(payment_cards_page.add_card_dialog).to_be_visible()
-    payment_cards_page.fill_card_form(CARD_DETAILS["cardholder_name"],CARD_DETAILS["valid_card_number"],CARD_DETAILS["invalid_expiry"],CARD_DETAILS["cvv"])
-    payment_cards_page.click_dialog_add()
+    payment_cards_page.add_card(CARD_DETAILS["cardholder_name"],CARD_DETAILS["valid_card_number"],CARD_DETAILS["invalid_expiry"],CARD_DETAILS["cvv"])
     expect(payment_cards_page.invalid_expiry_date_message).to_be_visible()
    
 
@@ -71,18 +59,61 @@ def test_delete_card(payment_cards_page):
     expect(payment_cards_page.card_items.first.or_(payment_cards_page.empty_state_text)).to_be_visible()
     cards_before = payment_cards_page.find_card(last4, holder, expiry).count()
 
-    payment_cards_page.click_add_card()
-    payment_cards_page.fill_card_form(holder, CARD_DETAILS["valid_card_number"], expiry, CARD_DETAILS["cvv"])
-    payment_cards_page.click_dialog_add()
+    payment_cards_page.add_card(holder, CARD_DETAILS["valid_card_number"], expiry, CARD_DETAILS["cvv"])
     expect(payment_cards_page.find_card(last4, holder, expiry)).to_have_count(cards_before + 1)   # מחכה שהכרטיס יופיע
 
     # Act: מוחקים את הכרטיס לפי הפרטים
     payment_cards_page.delete_card(last4, holder, expiry)
-
     # Assert: מופיעה הודעת "Card removed." וחזרנו למספר שהיה לפני ההוספה
     expect(payment_cards_page.card_removed_toast).to_be_visible()   # קודם ה-toast, לפני שהוא נעלם
     expect(payment_cards_page.find_card(last4, holder, expiry)).to_have_count(cards_before)
 
-# get_by_text("Card number is not valid (")
-# def test_delete_card(payment_cards_page):
+
+#negative - BUG
+# בדיקה: אסור להוסיף פעמיים כרטיס זהה לחלוטין. האתר כן מאפשר - זה באג (מתועד ב-STD)
+@pytest.mark.addCardDup
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="BUG: the site allows adding the exact same card twice")
+def test_cannot_add_duplicate_card(payment_cards_page):
+    last4 = CARD_DETAILS["valid_card_number"][-4:]
+    holder = CARD_DETAILS["cardholder_name"]
+    expiry = CARD_DETAILS["valid_expiry"]
+    card = payment_cards_page.find_card(last4, holder, expiry)
+
+    # Arrange: מחכים שהרשימה תיטען, וסופרים כמה כרטיסים תואמים יש
+    expect(payment_cards_page.card_items.first.or_(payment_cards_page.empty_state_text)).to_be_visible()
+    cards_before = card.count()
+
+    # תנאי מקדים: באתר אפשר עד 10 כרטיסים. צריך מקום ל-2, אחרת ההוספה תיחסם בגלל המגבלה ולא בגלל הכפילות
+    if payment_cards_page.card_items.count() > 8:
+        pytest.fail("Need room for 2 cards (site max is 10) - remove cards first")
+
+    cards_added = 0   # כמה כרטיסים השרת באמת הוסיף - כדי לדעת כמה למחוק בסוף
+
+    try:
+        # Act: מוסיפים כרטיס, ואז מנסים להוסיף את אותו כרטיס בדיוק פעם נוספת
+        payment_cards_page.add_card(holder, CARD_DETAILS["valid_card_number"], expiry, CARD_DETAILS["cvv"])
+        expect(card).to_have_count(cards_before + 1)          # הכרטיס הראשון נוסף
+        cards_added = 1
+
+        with payment_cards_page.page.expect_response("**/add-payment-card") as server_answer:
+            payment_cards_page.add_card(holder, CARD_DETAILS["valid_card_number"], expiry, CARD_DETAILS["cvv"])
+        if server_answer.value.ok:
+            cards_added = 2
+
+        # Assert: השרת צריך לדחות את הכרטיס הכפול (בפועל הוא מאשר - זה הבאג)
+        assert not server_answer.value.ok, "BUG: the duplicate card was accepted by the server"
+        expect(card).to_have_count(cards_before + 1)          # ונשאר רק כרטיס אחד חדש ברשימה
+
+    finally:
+        # Cleanup: סוגרים את חלון ההוספה אם נשאר פתוח, ומוחקים את כל הכרטיסים שהטסט הוסיף
+        if payment_cards_page.add_card_dialog.is_visible():
+            payment_cards_page.cancel_dialog()
+        expect(card).to_have_count(cards_before + cards_added)   # מחכים שהרשימה תציג את כל מה שנוסף
+        for _ in range(cards_added):
+            remaining = card.count()
+            payment_cards_page.delete_card(last4, holder, expiry)
+            expect(card).to_have_count(remaining - 1)
+
+
 

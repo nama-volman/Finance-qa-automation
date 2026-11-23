@@ -82,7 +82,6 @@ def test_convert_to_preferred_currency(wallets_page, other_currency):
 # בדיקה שלילית: הכנסת ערך שאינו מספר (אותיות) - מופיעה הודעת שגיאה ואין תוצאה
 @pytest.mark.wallets
 def test_amount_not_a_number_shows_error(wallets_page):
-    wallets_page.page.pause()
     wallets_page.fill_amount(INVALID_AMOUNT_NOT_A_NUMBER)
 
     expect(wallets_page.amount_error).to_have_text("Enter a valid positive number.")
@@ -93,7 +92,6 @@ def test_amount_not_a_number_shows_error(wallets_page):
 # בדיקה שלילית: מספר עם יותר מ-2 ספרות אחרי הנקודה - מופיעה הודעת שגיאה ואין תוצאה
 @pytest.mark.wallets
 def test_amount_with_more_than_2_decimals_shows_error(wallets_page):
-    wallets_page.page.pause()
     wallets_page.fill_amount(INVALID_AMOUNT_TOO_MANY_DECIMALS)
 
     expect(wallets_page.amount_error).to_have_text("Use at most 2 decimal places.")

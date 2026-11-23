@@ -29,3 +29,25 @@ CARD_DETAILS = {
     "invalid_expiry": "12/24",
     "cvv": "123",
 }
+
+
+#profile-settings
+# שם תצוגה תקין: 2 עד 50 תווים
+PROFILE_DETAILS = {
+    "valid_display_name": "QA Tester",
+    "too_short_display_name": "A",           # תו אחד - קצר מדי
+    "too_long_display_name": "A" * 51,       # 51 תווים - ארוך מדי
+}
+
+
+#bank-account
+# מספר חשבון תקין: 4 עד 20 ספרות
+BANK_ACCOUNT_DETAILS = {
+    "holder_name": "Israel Israeli",
+    "bank_name": "Test Bank",
+    "country": "Israel",
+    "currency": "ILS",
+    "valid_account_number": "12345678",                    # 8 ספרות - תקין
+    "too_short_account_number": "123",                     # 3 ספרות - קצר מדי
+    "too_long_account_number": "123456789012345678901",    # 21 ספרות - ארוך מדי
+}
