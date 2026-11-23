@@ -56,9 +56,14 @@ class WalletsPage(BaseDummyPayPage):
     # ---------- Wallet cards ----------
 
     @property
+    def wallet_cards(self) -> Locator:
+        # כל כרטיסי הארנקים: data-testid="wallet-ILS", "wallet-EUR" ...
+        return self.page.locator('[data-testid^="wallet-"]')
+
+    @property
     def preferred_wallet_card(self) -> Locator:
         # the wallet card with the "Preferred" badge (data-testid="wallet-EUR")
-        return self.page.locator('[data-testid^="wallet-"]').filter(has_text="Preferred")
+        return self.wallet_cards.filter(has_text="Preferred")
 
     # ---------- Exchange rates card ----------
 

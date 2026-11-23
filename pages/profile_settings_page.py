@@ -1,3 +1,4 @@
+import re
 
 from playwright.sync_api import Locator, Page ,expect
 from pages.base_dummy_pay import BaseDummyPayPage
@@ -53,6 +54,27 @@ class ProfileSettingsPage(BaseDummyPayPage):
     def change_btn(self) -> Locator:
         return self.main_area.get_by_role("button", name="Change")
 
+    @property
+    def display_name_error(self) -> Locator:
+        # הודעת שגיאה מתחת לשדה השם, למשל "Display name must be at least 2 characters."
+        return self.main_area.get_by_role("alert").filter(has_text="Display name must be")
+
+    @property
+    def confirm_currency_change_btn(self) -> Locator:
+        # כפתור האישור בחלון "Change preferred currency to GBP?"
+        return self.page.get_by_role("alertdialog").get_by_role("button", name="Confirm change")
+
+    # ---------- Toasts (הודעות זמניות שנעלמות אחרי כמה שניות) ----------
+
+    @property
+    def display_name_updated_toast(self) -> Locator:
+        return self.page.get_by_role("region", name=re.compile("Notifications")).get_by_text("Display name updated.")
+
+    def currency_changed_toast(self, currency: str) -> Locator:
+        # "Preferred currency changed to GBP."
+        return self.page.get_by_role("region", name=re.compile("Notifications")).get_by_text(
+            f"Preferred currency changed to {currency}.")
+
     # ---------- Actions ----------
 
     def fill_display_name(self, name: str) -> None:
@@ -66,6 +88,17 @@ class ProfileSettingsPage(BaseDummyPayPage):
 
     def click_change(self) -> None:
         self.change_btn.click()
+
+    # משנה את השם: ממלאת את השדה ולוחצת Save
+    def change_display_name(self, name: str) -> None:
+        self.fill_display_name(name)
+        self.click_save()
+
+    # משנה את המטבע המועדף: בחירה ברשימה, Change, ואישור בחלון ("Confirm change")
+    def change_preferred_currency(self, currency: str) -> None:
+        self.select_currency(currency)          # "GBP" בוחר את "GBP — British Pound"
+        self.click_change()
+        self.confirm_currency_change_btn.click()
 
     # ---------- Read data (return values, no checks) ----------
 

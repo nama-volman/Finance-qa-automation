@@ -16,6 +16,13 @@ from utilities import config
 from utilities import navbar_options as navbar
 
 
+# גודל חלון הדפדפן בכל הטסטים: 1280x1080 במקום ברירת המחדל 1280x720.
+# בחלון נמוך הדף מתארך כשהנתונים נטענים, ותפריט החשבון (בתחתית הסרגל) נדחף אל מחוץ למסך.
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    return {**browser_context_args, "viewport": {"width": 1280, "height": 1080}}
+
+
 @pytest.fixture(autouse=True)
 def default_timeout(page: Page) -> None:
     page.set_default_timeout(config.DEFAULT_TIMEOUT_MS)

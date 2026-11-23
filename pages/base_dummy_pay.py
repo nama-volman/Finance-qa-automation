@@ -53,7 +53,11 @@ class BaseDummyPayPage(BasePage):
     def page_heading(self, name: str) -> Locator:
         return self.page.get_by_role("heading", level=1, name=name)
 
+    # פותחת את תפריט החשבון (בתחתית הסרגל הצדדי).
+    # מחכים קודם שהדף יסיים לטעון: כשהנתונים נטענים הדף מתארך והכפתור זז למטה,
+    # ואם התפריט כבר פתוח - הוא נדחף אל מחוץ למסך ואי אפשר ללחוץ עליו.
     def open_account_menu(self) -> None:
+        self.page.wait_for_load_state("networkidle")
         self.account_menu_btn.click()
 
     def sign_out(self) -> None:
