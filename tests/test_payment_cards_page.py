@@ -28,8 +28,29 @@ def test_add_card_opens_and_cancel_closes_dialog(payment_cards_page):
 #positive
 @pytest.mark.addCard
 def test_add_new_card_with_valid_details(payment_cards_page):
-    payment_cards_page.add_card(CARD_DETAILS["cardholder_name"],CARD_DETAILS["valid_card_number"],CARD_DETAILS["valid_expiry"],CARD_DETAILS["cvv"])
-    expect(payment_cards_page.card_added_toast).to_be_visible()
+    holder = CARD_DETAILS["cardholder_name"]
+    number = CARD_DETAILS["valid_card_number"]
+    expiry = CARD_DETAILS["valid_expiry"]
+    cvv = CARD_DETAILS["cvv"]
+    last4 = number[-4:]
+
+    # Arrange: מחכים שהרשימה תיטען וסופרים את כל הכרטיסים
+    expect(payment_cards_page.card_items.first.or_(payment_cards_page.empty_state_text)).to_be_visible()
+    cards_before = payment_cards_page.card_items.count()
+
+    # Act
+    payment_cards_page.add_card(holder, number, expiry, cvv)
+
+    try:
+        # Assert: נוסף כרטיס אחד, והוא הכרטיס עם הפרטים שהזנו
+        expect(payment_cards_page.card_added_toast).to_be_visible()
+        expect(payment_cards_page.card_items).to_have_count(cards_before + 1)
+        expect(payment_cards_page.find_card(last4, holder, expiry).first).to_be_visible()
+    finally:
+        # Cleanup: מוחקים את הכרטיס שהטסט הוסיף
+        if payment_cards_page.card_items.count() > cards_before:
+            payment_cards_page.delete_card(last4, holder, expiry)
+            expect(payment_cards_page.card_items).to_have_count(cards_before)
 
 
 #negative 
@@ -54,19 +75,27 @@ def test_delete_card(payment_cards_page):
     last4 = CARD_DETAILS["valid_card_number"][-4:]      # "1111"
     holder = CARD_DETAILS["cardholder_name"]            # "Israel Israeli"
     expiry = CARD_DETAILS["valid_expiry"]               # "12/30"
+    card = payment_cards_page.find_card(last4, holder, expiry)
 
     # Arrange: מחכים שהרשימה תיטען (כרטיסים או "No cards yet"), סופרים, ומוסיפים כרטיס אחד
     expect(payment_cards_page.card_items.first.or_(payment_cards_page.empty_state_text)).to_be_visible()
-    cards_before = payment_cards_page.find_card(last4, holder, expiry).count()
+    cards_before = card.count()
 
     payment_cards_page.add_card(holder, CARD_DETAILS["valid_card_number"], expiry, CARD_DETAILS["cvv"])
-    expect(payment_cards_page.find_card(last4, holder, expiry)).to_have_count(cards_before + 1)   # מחכה שהכרטיס יופיע
 
-    # Act: מוחקים את הכרטיס לפי הפרטים
-    payment_cards_page.delete_card(last4, holder, expiry)
-    # Assert: מופיעה הודעת "Card removed." וחזרנו למספר שהיה לפני ההוספה
-    expect(payment_cards_page.card_removed_toast).to_be_visible()   # קודם ה-toast, לפני שהוא נעלם
-    expect(payment_cards_page.find_card(last4, holder, expiry)).to_have_count(cards_before)
+    try:
+        expect(card).to_have_count(cards_before + 1)   # מחכה שהכרטיס יופיע
+
+        # Act: מוחקים את הכרטיס לפי הפרטים
+        payment_cards_page.delete_card(last4, holder, expiry)
+
+        # Assert: מופיעה הודעת "Card removed." וחזרנו למספר שהיה לפני ההוספה
+        expect(payment_cards_page.card_removed_toast).to_be_visible()   # קודם ה-toast, לפני שהוא נעלם
+        expect(card).to_have_count(cards_before)
+    finally:
+        # Cleanup: אם המחיקה נכשלה והכרטיס עדיין קיים - מוחקים אותו, כדי לא להשאיר כרטיסים בחשבון
+        if card.count() > cards_before:
+            payment_cards_page.delete_card(last4, holder, expiry)
 
 
 #negative - BUG

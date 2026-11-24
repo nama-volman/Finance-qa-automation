@@ -6,6 +6,10 @@ load_dotenv(override=True)
 DEFAULT_TIMEOUT_MS = int(os.getenv("DEFAULT_TIMEOUT_MS", "20000"))
 URL_FINANCE_SITE="https://dummypay.vercel.app/"
 
+
+SUPABASE_URL= os.getenv("SUPABASE_URL")
+SUPABASE_ANON_KEY=os.getenv("SUPABASE_ANON_KEY")
+
 # sign-in
 EMAIL_YAEL = os.getenv("EMAIL_YAEL")
 PASSWORD_YAEL = os.getenv("PASSWORD_YAEL")
@@ -51,3 +55,5 @@ BANK_ACCOUNT_DETAILS = {
     "too_short_account_number": "123",                     # 3 ספרות - קצר מדי
     "too_long_account_number": "123456789012345678901",    # 21 ספרות - ארוך מדי
 }
+
+AMOUNT_TO_SEND=100

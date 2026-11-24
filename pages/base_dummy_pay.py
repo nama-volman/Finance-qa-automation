@@ -44,6 +44,11 @@ class BaseDummyPayPage(BasePage):
         return self.page.get_by_role("menuitem", name="Profile & Settings")
 
     @property
+    def account_menu(self) -> Locator:
+        # התפריט שנפתח מהכפתור: מייל, Profile & Settings, Sign out
+        return self.page.get_by_role("menu")
+
+    @property
     def sign_out_item(self) -> Locator:
         return self.page.get_by_role("menuitem", name="Sign out")
 
