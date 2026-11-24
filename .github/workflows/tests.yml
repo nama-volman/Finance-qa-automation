@@ -18,6 +18,8 @@ jobs:
       PASSWORD_YAEL: ${{ secrets.PASSWORD_YAEL }}
       EMAIL_NAAMA: ${{ secrets.EMAIL_NAAMA }}
       PASSWORD_NAAMA: ${{ secrets.PASSWORD_NAAMA }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
     steps:
       - name: Checkout code

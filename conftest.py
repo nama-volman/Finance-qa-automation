@@ -1,3 +1,5 @@
+
+from api.base_api import rpc
 from pages.base_dummy_pay import BaseDummyPayPage
 import pytest
 from playwright.sync_api import Page, expect
@@ -15,6 +17,8 @@ from pages.profile_settings_page import ProfileSettingsPage
 from utilities import config
 from utilities import navbar_options as navbar
 
+from api.auth_api import get_token, create_api_context
+
 
 # גודל חלון הדפדפן בכל הטסטים: 1280x1080 במקום ברירת המחדל 1280x720.
 # בחלון נמוך הדף מתארך כשהנתונים נטענים, ותפריט החשבון (בתחתית הסרגל) נדחף אל מחוץ למסך.
@@ -23,9 +27,14 @@ def browser_context_args(browser_context_args):
     return {**browser_context_args, "viewport": {"width": 1280, "height": 1080}}
 
 
-@pytest.fixture(autouse=True)
-def default_timeout(page: Page) -> None:
-    page.set_default_timeout(config.DEFAULT_TIMEOUT_MS)
+# @pytest.fixture(autouse=True)
+# def default_timeout(page: Page) -> None:
+#     page.set_default_timeout(config.DEFAULT_TIMEOUT_MS)
+
+@pytest.fixture
+def context(context):
+    context.set_default_timeout(config.DEFAULT_TIMEOUT_MS)
+    return context
 
 @pytest.fixture
 def login_page(page: Page) -> LoginPage:
@@ -102,4 +111,34 @@ def profile_settings_page(logged_in):
     return ProfileSettingsPage(logged_in.page)
 
 
+## API FIXTURES
+@pytest.fixture(scope="session")
+def token_yael(playwright):
+    return get_token(playwright, config.EMAIL_YAEL, config.PASSWORD_YAEL)
 
+
+@pytest.fixture(scope="session")
+def token_naama(playwright):
+    return get_token(playwright, config.EMAIL_NAAMA, config.PASSWORD_NAAMA)
+
+
+@pytest.fixture(scope="session")
+def api_yael(playwright, token_yael):
+    context = create_api_context(playwright, token_yael)
+    yield context
+    context.dispose()
+
+
+@pytest.fixture(scope="session")
+def api_naama(playwright, token_naama):
+    context = create_api_context(playwright, token_naama)
+    yield context
+    context.dispose()
+
+
+@pytest.fixture(scope="session")
+def naama(api_yael):
+    response = rpc(api_yael, "lookup_recipient", {"p_email": config.EMAIL_NAAMA})
+    result = response.json()[0]
+    assert result["status"] == "found", f"Naama not found: {result}"
+    return result
