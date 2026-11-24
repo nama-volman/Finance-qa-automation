@@ -95,12 +95,18 @@ def test_delete_bank_account(bank_accounts_page):
     accounts_before = account.count()
     bank_accounts_page.add_bank_account(details["holder_name"], bank_name, details["country"],
                                         details["currency"], details["valid_account_number"])
-    expect(account).to_have_count(accounts_before + 1)    # מחכים שהחשבון יופיע
 
-    # Act: מוחקים את החשבון
-    bank_accounts_page.delete_bank_account(bank_name, last4)
+    try:
+        expect(account).to_have_count(accounts_before + 1)    # מחכים שהחשבון יופיע
 
-    # Assert: קודם ה-toast (לפני שהוא נעלם), ואז שהחשבון נעלם מהרשימה
-    expect(bank_accounts_page.bank_account_removed_toast).to_be_visible()
-    expect(account).to_have_count(accounts_before)
+        # Act: מוחקים את החשבון
+        bank_accounts_page.delete_bank_account(bank_name, last4)
+
+        # Assert: קודם ה-toast (לפני שהוא נעלם), ואז שהחשבון נעלם מהרשימה
+        expect(bank_accounts_page.bank_account_removed_toast).to_be_visible()
+        expect(account).to_have_count(accounts_before)
+    finally:
+        # Cleanup: אם המחיקה נכשלה והחשבון עדיין קיים - מוחקים אותו
+        if account.count() > accounts_before:
+            bank_accounts_page.delete_bank_account(bank_name, last4)
 

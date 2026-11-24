@@ -27,9 +27,8 @@ def test_account_menu_opens_with_options(logged_in):
 
 
 # בדיקה: לחיצה על Profile & Settings בתפריט מעבירה לדף ההגדרות
-@pytest.mark.navigation12
+@pytest.mark.navigation
 def test_account_menu_opens_profile_settings(logged_in):
-    logged_in.page.pause()
     logged_in.go_to_profile_from_account_menu()
     expect(logged_in.page).to_have_url(re.compile(r"/settings$"))
     expect(logged_in.page_heading("Profile & Settings")).to_be_visible()

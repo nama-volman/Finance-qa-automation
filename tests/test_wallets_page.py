@@ -27,7 +27,7 @@ MAX_WALLETS = len(CURRENCIES)
 # Positive test
 # בדיקה: כשיש פחות מ-4 ארנקים, הכפתור לחיץ והחלון נפתח ונסגר.
 # אם כבר יש 4 ארנקים - הטסט מדולג (את המצב הזה בודק הטסט השלילי).
-@pytest.mark.navigation123
+@pytest.mark.navigation
 def test_add_wallet_opens_and_cancel_closes_dialog(wallets_page):
     expect(wallets_page.wallet_cards.first).to_be_visible()      # מחכים שהארנקים ייטענו
     if wallets_page.wallet_cards.count() >= MAX_WALLETS:

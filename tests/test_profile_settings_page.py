@@ -3,6 +3,7 @@ from pages.dashboard_page import DashboardPage
 from pages.login_page import LoginPage
 from playwright.sync_api import Page, expect
 import random
+from datetime import datetime
 import pytest
 from utilities import navbar_options as navbar
 from utilities.config import EMAIL_YAEL, PROFILE_DETAILS
@@ -22,10 +23,11 @@ def test_profile_settings_page_is_displayed(profile_settings_page):
 
 #positive
 # בדיקה: מילוי שם תקין - מופיעה הודעת הצלחה והשם החדש מוצג בפרופיל.
-# מוסיפים מספר אקראי לשם, כי כפתור Save לא פעיל כשהשם לא השתנה מההרצה הקודמת.
+# מוסיפים לשם את השעה (עם שניות), כי כפתור Save לא פעיל כשהשם לא השתנה מההרצה הקודמת.
+# שעה תמיד שונה מההרצה הקודמת, בניגוד למספר אקראי שיכול לחזור על עצמו.
 @pytest.mark.profile
 def test_change_display_name_valid(profile_settings_page):
-    new_name = f"{PROFILE_DETAILS['valid_display_name']} {random.randint(1, 999)}"   # "QA Tester 42"
+    new_name = f"{PROFILE_DETAILS['valid_display_name']} {datetime.now().strftime('%H%M%S')}"   # "QA Tester 143025"
     profile_settings_page.change_display_name(new_name)
 
     expect(profile_settings_page.display_name_updated_toast).to_be_visible()

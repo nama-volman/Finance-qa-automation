@@ -20,6 +20,9 @@ from utilities import navbar_options as navbar
 from api.auth_api import get_token, create_api_context
 
 
+
+expect.set_options(timeout=config.DEFAULT_TIMEOUT_MS)
+
 # גודל חלון הדפדפן בכל הטסטים: 1280x1080 במקום ברירת המחדל 1280x720.
 # בחלון נמוך הדף מתארך כשהנתונים נטענים, ותפריט החשבון (בתחתית הסרגל) נדחף אל מחוץ למסך.
 @pytest.fixture(scope="session")
