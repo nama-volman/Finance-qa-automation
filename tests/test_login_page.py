@@ -1,5 +1,6 @@
 
 import re
+from urllib.parse import urljoin
 
 from pages.login_page import LoginPage
 from playwright.sync_api import Page, expect
@@ -53,7 +54,7 @@ def test_login_with_second_user(login_page):
 
 @pytest.mark.login
 def test_logged_out_user_is_redirected_to_login(page: Page):
-    page.goto("/wallets")
+    page.goto(urljoin(URL_FINANCE_SITE, "/wallets"))
     expect(page).to_have_url(re.compile(r"/login$"))
 
 

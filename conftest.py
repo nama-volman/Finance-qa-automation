@@ -27,7 +27,7 @@ expect.set_options(timeout=config.DEFAULT_TIMEOUT_MS)
 # בחלון נמוך הדף מתארך כשהנתונים נטענים, ותפריט החשבון (בתחתית הסרגל) נדחף אל מחוץ למסך.
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
-    return {**browser_context_args, "viewport": {"width": 1280, "height": 720}}
+    return {**browser_context_args, "viewport": {"width": 1280, "height": 1080}}
 
 
 # @pytest.fixture(autouse=True)
