@@ -57,3 +57,17 @@ BANK_ACCOUNT_DETAILS = {
 }
 
 AMOUNT_TO_SEND=100
+NOT_REGISTERED_EMAIL = "noexists@example.com"
+
+
+
+#transaction-history-filters
+HISTORY_FILTERS = {
+    "future_date": "2027-01-01",
+    "later_date": "2026-11-25",
+    "day_with_two_transactions": "2026-11-19",
+    "day_text": "Nov 19, 2026",
+    "currency": "EUR",
+    "currency_symbol": "€",
+    "type": "Received",
+}

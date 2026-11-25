@@ -60,6 +60,13 @@ class TransactionHistoryPage(BaseDummyPayPage):
     def page_indicator(self) -> Locator:
         return self.main_area.get_by_text(re.compile(r"^Page \d+ of \d+$"))
 
+    @property
+    def no_results_text(self) -> Locator:
+        return self.main_area.get_by_text("No matching transactions")
+
+    def rows_without_text(self, text: str) -> Locator:
+        return self.transactions.filter(has_not_text=text)
+    
     # ---------- Transaction details dialog ----------
 
     @property
@@ -96,3 +103,10 @@ class TransactionHistoryPage(BaseDummyPayPage):
 
     def click_previous(self) -> None:
         self.previous_btn.click()
+
+    def wait_for_list_loaded(self) -> None:
+        self.transactions_count_text.wait_for()
+
+    def set_date_range(self, from_date: str, to_date: str = "") -> None:
+        self.from_date_input.fill(from_date)
+        self.to_date_input.fill(to_date)
