@@ -82,8 +82,6 @@ def send_money_page(logged_in):
     return SendMoneyPage(logged_in.page)
 
 
-
-
 @pytest.fixture
 def transaction_history_page(logged_in):
     logged_in.navigate_to(navbar.TRANSACTION_HISTORY)
@@ -116,32 +114,32 @@ def profile_settings_page(logged_in):
 
 ## API FIXTURES
 @pytest.fixture(scope="session")
-def token_yael(playwright):
+def token_sender(playwright):
     return get_token(playwright, config.EMAIL_YAEL, config.PASSWORD_YAEL)
 
 
 @pytest.fixture(scope="session")
-def token_naama(playwright):
+def token_receiver(playwright):
     return get_token(playwright, config.EMAIL_NAAMA, config.PASSWORD_NAAMA)
 
 
 @pytest.fixture(scope="session")
-def api_yael(playwright, token_yael):
-    context = create_api_context(playwright, token_yael)
+def api_sender(playwright, token_sender):
+    context = create_api_context(playwright, token_sender)
     yield context
     context.dispose()
 
 
 @pytest.fixture(scope="session")
-def api_naama(playwright, token_naama):
-    context = create_api_context(playwright, token_naama)
+def api_receiver(playwright, token_receiver):
+    context = create_api_context(playwright, token_receiver)
     yield context
     context.dispose()
 
 
 @pytest.fixture(scope="session")
-def naama(api_yael):
-    response = rpc(api_yael, "lookup_recipient", {"p_email": config.EMAIL_NAAMA})
+def receiver(api_sender):
+    response = rpc(api_sender, "lookup_recipient", {"p_email": config.EMAIL_NAAMA})
     result = response.json()[0]
     assert result["status"] == "found", f"Naama not found: {result}"
     return result

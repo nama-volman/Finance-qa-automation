@@ -1,4 +1,7 @@
+from urllib.parse import urljoin
+
 from playwright.sync_api import Page
+from utilities import config
 
 
 class BasePage:
@@ -9,4 +12,5 @@ class BasePage:
 
 
     def open(self) -> None:
-        self.page.goto(self.PATH, wait_until="domcontentloaded")
+        # Build the full address from the site URL + this page's path (no --base-url needed)
+        self.page.goto(urljoin(config.URL_FINANCE_SITE, self.PATH), wait_until="domcontentloaded")

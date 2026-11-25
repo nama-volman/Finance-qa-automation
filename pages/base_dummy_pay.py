@@ -3,6 +3,7 @@ import re
 
 from pages.base_page import BasePage
 from playwright.sync_api import Locator, Page ,expect
+from utilities import config
 from utilities.config import EMAIL_YAEL, PASSWORD_YAEL
 from utilities.navbar_options import NAV_PAGES_0PTIONS
 
@@ -12,7 +13,7 @@ from utilities.navbar_options import NAV_PAGES_0PTIONS
 #     sendMoney = '/send'
 
 class BaseDummyPayPage(BasePage):
-    PATH = "/"
+    PATH = config.URL_FINANCE_SITE
 
     def __init__(self, page: Page) -> None:
         super().__init__(page) 
@@ -83,11 +84,6 @@ class BaseDummyPayPage(BasePage):
     def click_sign_in(self) -> None:
         self.sing_in_btn.highlight()
         self.sing_in_btn.click()
-    
-        
-    # def loginAndNavigate(self, enum):
-    #     self.login_with_valid_credentials()
-    #     self.navigateTo(enum)
 
 
     def navigate_to(self, menu_item: str) -> None:

@@ -5,6 +5,7 @@ from playwright.sync_api import expect
 import pytest
 
 from utilities import navbar_options as navbar
+from utilities.config import URL_FINANCE_SITE
 
 
 @pytest.mark.login
@@ -26,7 +27,7 @@ def test_protected_page_is_blocked_after_sign_out(logged_in):
     logged_in.sign_out()
     expect(logged_in.page).to_have_url(re.compile(r"/login$"))
 
-    logged_in.page.goto("/")
+    logged_in.page.goto(URL_FINANCE_SITE)
     expect(logged_in.page).to_have_url(re.compile(r"/login$"))
     expect(logged_in.page_heading("Dashboard")).to_be_hidden()
 
