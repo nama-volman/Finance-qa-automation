@@ -1,4 +1,5 @@
 from playwright.sync_api import Playwright
+
 from utilities import config
 
 

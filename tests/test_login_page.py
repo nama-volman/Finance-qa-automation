@@ -2,13 +2,21 @@
 import re
 from urllib.parse import urljoin
 
-from pages.login_page import LoginPage
-from playwright.sync_api import Page, expect
 import pytest
-from utilities.config import URL_FINANCE_SITE, EMAIL_YAEL, PASSWORD_YAEL, EMAIL_NAAMA, PASSWORD_NAAMA
+from playwright.sync_api import Page, expect
+
+from pages.login_page import LoginPage
+from utilities.config import (
+    EMAIL_NAAMA,
+    EMAIL_YAEL,
+    PASSWORD_NAAMA,
+    PASSWORD_YAEL,
+    URL_FINANCE_SITE,
+)
 
 
-@pytest.mark.smoke
+@pytest.mark.positive
+@pytest.mark.login
 def test_login_to_finance_site(page: Page):
     loginPage = LoginPage(page)
     loginPage.open()
@@ -21,6 +29,7 @@ def test_login_to_finance_site(page: Page):
     expect(loginPage.dashboard_title).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.smoke
 def test_login_page_elements_are_displayed(login_page):
     expect(login_page.login_page_title).to_be_visible()
@@ -31,20 +40,22 @@ def test_login_page_elements_are_displayed(login_page):
     expect(login_page.create_account_link).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_forgot_password_link_opens_forgot_password_page(login_page):
     login_page.click_forgot_password()
     expect(login_page.page).to_have_url(re.compile(r"/forgot-password$"))
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_create_account_link_opens_register_page(login_page):
     login_page.click_create_account()
     expect(login_page.page).to_have_url(re.compile(r"/register$"))
 
 
-# ==================== Positive ====================
 
+@pytest.mark.positive
 @pytest.mark.login
 def test_login_with_second_user(login_page):
     login_page.login(EMAIL_NAAMA, PASSWORD_NAAMA)
@@ -52,14 +63,15 @@ def test_login_with_second_user(login_page):
     expect(login_page.dashboard_title).to_be_visible()
 
 
+@pytest.mark.negative
 @pytest.mark.login
 def test_logged_out_user_is_redirected_to_login(page: Page):
     page.goto(urljoin(URL_FINANCE_SITE, "/wallets"))
     expect(page).to_have_url(re.compile(r"/login$"))
 
 
-# ==================== Negative ====================
 
+@pytest.mark.negative
 @pytest.mark.login
 def test_login_with_empty_fields_shows_both_errors(login_page):
     login_page.click_sign_in()
@@ -70,6 +82,7 @@ def test_login_with_empty_fields_shows_both_errors(login_page):
     expect(login_page.page).to_have_url(re.compile(r"/login$"))
 
 
+@pytest.mark.negative
 @pytest.mark.login
 def test_login_with_invalid_email_format(login_page):
     login_page.login("not-an-email", PASSWORD_YAEL)
@@ -78,6 +91,7 @@ def test_login_with_invalid_email_format(login_page):
     expect(login_page.page).to_have_url(re.compile(r"/login$"))
 
 
+@pytest.mark.negative
 @pytest.mark.login
 def test_login_without_password(login_page):
     login_page.login(EMAIL_YAEL, "")
@@ -86,6 +100,7 @@ def test_login_without_password(login_page):
     expect(login_page.page).to_have_url(re.compile(r"/login$"))
 
 
+@pytest.mark.negative
 @pytest.mark.login
 def test_login_with_wrong_password(login_page):
     login_page.login(EMAIL_YAEL, "WrongPassword123!")
@@ -94,6 +109,7 @@ def test_login_with_wrong_password(login_page):
     expect(login_page.dashboard_title).to_be_hidden()
 
 
+@pytest.mark.negative
 @pytest.mark.login
 def test_login_with_unregistered_email(login_page):
     login_page.login("not-registered-user@example.com", "SomePassword123!")

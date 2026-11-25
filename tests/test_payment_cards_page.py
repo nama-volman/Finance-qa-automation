@@ -1,11 +1,11 @@
 
-from pages.payment_cards_page import PaymentCardsPage
-from pages.login_page import LoginPage
-from utilities.config import CARD_DETAILS
-from playwright.sync_api import Page, expect
 import pytest
+from playwright.sync_api import expect
+
+from utilities.config import CARD_DETAILS
 
 
+@pytest.mark.positive
 @pytest.mark.smoke
 def test_payment_cards_page_is_displayed(payment_cards_page):
     expect(payment_cards_page.cards_title).to_be_visible()
@@ -13,6 +13,7 @@ def test_payment_cards_page_is_displayed(payment_cards_page):
     expect(payment_cards_page.simulated_alert).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_add_card_opens_and_cancel_closes_dialog(payment_cards_page):
     payment_cards_page.click_add_card()
@@ -25,8 +26,8 @@ def test_add_card_opens_and_cancel_closes_dialog(payment_cards_page):
     payment_cards_page.cancel_dialog()
     expect(payment_cards_page.add_card_dialog).to_be_hidden()
 
-#positive
-@pytest.mark.addCard
+@pytest.mark.positive
+@pytest.mark.cards
 def test_add_new_card_with_valid_details(payment_cards_page):
     holder = CARD_DETAILS["cardholder_name"]
     number = CARD_DETAILS["valid_card_number"]
@@ -53,24 +54,24 @@ def test_add_new_card_with_valid_details(payment_cards_page):
             expect(payment_cards_page.card_items).to_have_count(cards_before)
 
 
-#negative 
-@pytest.mark.addCard
+@pytest.mark.negative
+@pytest.mark.cards
 def test_add_new_card_with_invalid_card_number(payment_cards_page):
     payment_cards_page.add_card(CARD_DETAILS["cardholder_name"],CARD_DETAILS["invalid_card_number"],CARD_DETAILS["valid_expiry"],CARD_DETAILS["cvv"])
     expect(payment_cards_page.invalid_card_number_message).to_be_visible()
-   
 
 
-#negative 
-@pytest.mark.addCard
+
+@pytest.mark.negative
+@pytest.mark.cards
 def test_add_new_card_with_invalid_expiry_date(payment_cards_page):
     payment_cards_page.add_card(CARD_DETAILS["cardholder_name"],CARD_DETAILS["valid_card_number"],CARD_DETAILS["invalid_expiry"],CARD_DETAILS["cvv"])
     expect(payment_cards_page.invalid_expiry_date_message).to_be_visible()
-   
 
-#positive
+
 # בדיקה: מחיקת כרטיס לפי 3 הפרטים - נשאר כרטיס תואם אחד פחות
-@pytest.mark.deleteCard
+@pytest.mark.positive
+@pytest.mark.cards
 def test_delete_card(payment_cards_page):
     last4 = CARD_DETAILS["valid_card_number"][-4:]      # "1111"
     holder = CARD_DETAILS["cardholder_name"]            # "Israel Israeli"
@@ -98,9 +99,9 @@ def test_delete_card(payment_cards_page):
             payment_cards_page.delete_card(last4, holder, expiry)
 
 
-#negative - BUG
 # בדיקה: אסור להוסיף פעמיים כרטיס זהה לחלוטין. האתר כן מאפשר - זה באג (מתועד ב-STD)
-@pytest.mark.addCardDup
+@pytest.mark.negative
+@pytest.mark.cards
 @pytest.mark.xfail(strict=True, raises=AssertionError,
                    reason="BUG: the site allows adding the exact same card twice")
 def test_cannot_add_duplicate_card(payment_cards_page):
@@ -136,7 +137,11 @@ def test_cannot_add_duplicate_card(payment_cards_page):
 
     finally:
         # Cleanup: סוגרים את חלון ההוספה אם נשאר פתוח, ומוחקים את כל הכרטיסים שהטסט הוסיף
-        if payment_cards_page.add_card_dialog.is_visible():
+        # מחכים עד 3 שניות שהחלון ייסגר לבד (אנימציית סגירה). רק אם הוא עדיין פתוח - לוחצים Cancel.
+        # בלי ההמתנה: is_visible() יכול להחזיר True באמצע האנימציה, והלחיצה על Cancel נכשלת.
+        try:
+            expect(payment_cards_page.add_card_dialog).to_be_hidden(timeout=3000)
+        except AssertionError:
             payment_cards_page.cancel_dialog()
         expect(card).to_have_count(cards_before + cards_added)   # מחכים שהרשימה תציג את כל מה שנוסף
         for _ in range(cards_added):

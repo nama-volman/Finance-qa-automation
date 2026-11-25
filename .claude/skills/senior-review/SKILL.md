@@ -1,5 +1,5 @@
 ---
-name: code-review
+name: senior-review
 description: Senior-level software engineering code review. Identifies unnecessary complexity, overengineering, bad practices, bugs, maintainability issues, and architectural or design flaws. Use when reviewing code, pull requests, Git diffs, implementations, or existing code.
 ---
 

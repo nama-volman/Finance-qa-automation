@@ -1,14 +1,17 @@
 
-from pages.wallets_page import WalletsPage
-from pages.login_page import LoginPage
-from playwright.sync_api import Page, expect
 import random
+
 import pytest
+from playwright.sync_api import expect
 
+from utilities.config import (
+    INVALID_AMOUNT_NOT_A_NUMBER,
+    INVALID_AMOUNT_TOO_MANY_DECIMALS,
+)
 from utilities.money import CURRENCIES, convert_with_preferred
-from utilities.config import INVALID_AMOUNT_NOT_A_NUMBER, INVALID_AMOUNT_TOO_MANY_DECIMALS
 
 
+@pytest.mark.positive
 @pytest.mark.smoke
 def test_wallets_page_is_displayed(wallets_page):
     expect(wallets_page.wallets_title).to_be_visible()
@@ -24,9 +27,9 @@ def test_wallets_page_is_displayed(wallets_page):
 MAX_WALLETS = len(CURRENCIES)
 
 
-# Positive test
 # בדיקה: כשיש פחות מ-4 ארנקים, הכפתור לחיץ והחלון נפתח ונסגר.
 # אם כבר יש 4 ארנקים - הטסט מדולג (את המצב הזה בודק הטסט השלילי).
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_add_wallet_opens_and_cancel_closes_dialog(wallets_page):
     expect(wallets_page.wallet_cards.first).to_be_visible()      # מחכים שהארנקים ייטענו
@@ -42,10 +45,10 @@ def test_add_wallet_opens_and_cancel_closes_dialog(wallets_page):
     expect(wallets_page.add_wallet_dialog).to_be_hidden()
 
 
-# Negative test
 # בדיקה: כשיש 4 ארנקים (אחד לכל מטבע) - הכפתור Add wallet לא לחיץ.
 # אם יש פחות מ-4 ארנקים - הטסט מדולג (את המצב הזה בודק הטסט החיובי).
-@pytest.mark.navigation
+@pytest.mark.negative
+@pytest.mark.wallets
 def test_add_wallet_disabled_when_max_wallets(wallets_page):
     expect(wallets_page.wallet_cards.first).to_be_visible()      # מחכים שהארנקים ייטענו
     if wallets_page.wallet_cards.count() < MAX_WALLETS:
@@ -81,6 +84,7 @@ def check_conversion(wallets_page, preferred, from_currency, to_currency):
 
 
 # בדיקה: המרה מהמטבע המועדף לכל אחד מ-3 המטבעות האחרים
+@pytest.mark.positive
 @pytest.mark.wallets
 @pytest.mark.parametrize("other_currency", CURRENCIES)
 def test_convert_from_preferred_currency(wallets_page, other_currency):
@@ -91,6 +95,7 @@ def test_convert_from_preferred_currency(wallets_page, other_currency):
 
 
 # בדיקה: המרה מכל אחד מ-3 המטבעות האחרים אל המטבע המועדף
+@pytest.mark.positive
 @pytest.mark.wallets
 @pytest.mark.parametrize("other_currency", CURRENCIES)
 def test_convert_to_preferred_currency(wallets_page, other_currency):
@@ -103,6 +108,7 @@ def test_convert_to_preferred_currency(wallets_page, other_currency):
 # ==================== Conversion calculator - negative ====================
 
 # בדיקה שלילית: הכנסת ערך שאינו מספר (אותיות) - מופיעה הודעת שגיאה ואין תוצאה
+@pytest.mark.negative
 @pytest.mark.wallets
 def test_amount_not_a_number_shows_error(wallets_page):
     wallets_page.fill_amount(INVALID_AMOUNT_NOT_A_NUMBER)
@@ -113,6 +119,7 @@ def test_amount_not_a_number_shows_error(wallets_page):
 
 
 # בדיקה שלילית: מספר עם יותר מ-2 ספרות אחרי הנקודה - מופיעה הודעת שגיאה ואין תוצאה
+@pytest.mark.negative
 @pytest.mark.wallets
 def test_amount_with_more_than_2_decimals_shows_error(wallets_page):
     wallets_page.fill_amount(INVALID_AMOUNT_TOO_MANY_DECIMALS)

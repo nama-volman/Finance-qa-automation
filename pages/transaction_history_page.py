@@ -1,7 +1,9 @@
 import re
 
-from playwright.sync_api import Locator, Page ,expect
+from playwright.sync_api import Locator, Page
+
 from pages.base_dummy_pay import BaseDummyPayPage
+
 
 class TransactionHistoryPage(BaseDummyPayPage):
 
@@ -66,7 +68,7 @@ class TransactionHistoryPage(BaseDummyPayPage):
 
     def rows_without_text(self, text: str) -> Locator:
         return self.transactions.filter(has_not_text=text)
-    
+
     # ---------- Transaction details dialog ----------
 
     @property

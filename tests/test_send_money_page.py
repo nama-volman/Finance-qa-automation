@@ -1,11 +1,11 @@
 
-from pages.send_money_page import SendMoneyPage
-from pages.login_page import LoginPage
-from playwright.sync_api import Page, expect
 import pytest
+from playwright.sync_api import expect
+
 from utilities.config import EMAIL_NAAMA
 
 
+@pytest.mark.positive
 @pytest.mark.smoke
 def test_send_money_page_is_displayed(send_money_page):
     expect(send_money_page.send_money_title).to_be_visible()
@@ -14,6 +14,7 @@ def test_send_money_page_is_displayed(send_money_page):
     expect(send_money_page.find_recipient_btn).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_continue_opens_amount_step_and_back_returns(send_money_page):
     # Only finds the recipient and moves between steps - no money is sent

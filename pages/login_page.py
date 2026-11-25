@@ -1,9 +1,7 @@
-from playwright.sync_api import Locator, Page, expect
+from playwright.sync_api import Locator, Page
 
 from pages.base_dummy_pay import BaseDummyPayPage
-from utilities import config
-from utilities.config import EMAIL_YAEL, PASSWORD_YAEL, URL_FINANCE_SITE
-import re
+from utilities.config import URL_FINANCE_SITE
 
 
 class LoginPage(BaseDummyPayPage):
@@ -12,7 +10,7 @@ class LoginPage(BaseDummyPayPage):
     def __init__(self, page: Page):
         super().__init__(page)
 
-    
+
     @property
     def login_page_title(self) -> Locator:
         return self.page.get_by_text("DummyPay", exact=True)
@@ -21,7 +19,7 @@ class LoginPage(BaseDummyPayPage):
     @property
     def forget_password_link(self) -> Locator:
         return self.page.get_by_role("link", name="Forgot password?")
-    
+
     @property
     def dashboard_title(self) -> Locator:
         return self.page.get_by_role("heading", name="Dashboard")
