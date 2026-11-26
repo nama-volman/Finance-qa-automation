@@ -1,5 +1,4 @@
 import uuid
-
 import pytest
 
 from api.base_api import rpc
@@ -48,7 +47,13 @@ def test_lookup_recipient_found(api_sender):
 
 @pytest.mark.positive
 @pytest.mark.api
-def test_send_money_success(api_sender, api_receiver, receiver):
+def test_send_money_success(api_sender, api_receiver, receiver,dashboard_page):
+    # for UI test
+    total_before = dashboard_page.get_total_balance()
+    preferred = dashboard_page.get_preferred_currency()
+    print("\nUI Total balance BEFORE transfer:", total_before, preferred)
+    #
+
     wallets = api_sender.get("/rest/v1/wallets?select=currency,balance_minor&order=created_at.asc").json()
     funded = [w for w in wallets if w["balance_minor"] >= config.AMOUNT_TO_SEND]
     assert funded, f"Sender has no wallet with at least {config.AMOUNT_TO_SEND}: {wallets}"
@@ -117,6 +122,20 @@ def test_send_money_success(api_sender, api_receiver, receiver):
     assert notifications[0]["kind"] == "payment_received"
     assert notifications[0]["amount_minor"] == quote_result["receiving_amount_minor"]
     assert notifications[0]["currency"] == receiver_currency
+
+
+    #for UI test: the sender's dashboard Total balance went down by the amount sent
+    sent = quote_result["sending_amount_minor"] / 100              # minor units -> 1.00
+    if wallet["currency"] != preferred:
+        sent = sent / dashboard_page.get_rate(wallet["currency"])  # e.g. ILS -> EUR
+
+    dashboard_page.page.reload()
+    total_after = dashboard_page.get_total_balance()
+    print("\nUI Total balance AFTER transfer:", total_after, preferred,
+          f"(expected {total_before} - {sent:.2f})")
+
+    assert total_after == pytest.approx(total_before - sent, abs=0.02)
+
 
 
 @pytest.mark.negative
