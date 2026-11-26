@@ -1,7 +1,9 @@
 import re
 
-from playwright.sync_api import Locator, Page ,expect
+from playwright.sync_api import Locator, Page, expect
+
 from pages.base_dummy_pay import BaseDummyPayPage
+
 
 class BankAccountsPage(BaseDummyPayPage):
 

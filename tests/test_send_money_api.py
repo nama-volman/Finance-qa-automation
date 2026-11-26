@@ -1,10 +1,14 @@
 import uuid
 
+import pytest
+
 from api.base_api import rpc
 from api.wallets_api import get_balance
 from utilities import config
 
 
+@pytest.mark.positive
+@pytest.mark.api
 def test_tokens_received(token_sender, token_receiver):
     print("Sender token (first 20 chars):  ", token_sender[:20])
     print("Receiver token (first 20 chars):", token_receiver[:20])
@@ -15,6 +19,8 @@ def test_tokens_received(token_sender, token_receiver):
 
 
 
+@pytest.mark.positive
+@pytest.mark.api
 def test_read_sender_wallets(api_sender):
     response = api_sender.get("/rest/v1/wallets?select=currency,balance_minor")
     assert response.status == 200
@@ -22,9 +28,11 @@ def test_read_sender_wallets(api_sender):
     wallets = response.json()
     print("Sender wallets (balance in minor units):", wallets)
 
-    assert len(wallets) > 0    # בודק שיש לפחות ארנק אחד 
+    assert len(wallets) > 0    # בודק שיש לפחות ארנק אחד
 
 
+@pytest.mark.positive
+@pytest.mark.api
 def test_lookup_recipient_found(api_sender):
     response = rpc(api_sender, "lookup_recipient", {"p_email": config.EMAIL_NAAMA})
     assert response.status == 200
@@ -38,7 +46,8 @@ def test_lookup_recipient_found(api_sender):
 # def test_receiver_fixture(receiver):
 #     print(receiver["user_id"], receiver["preferred_currency"])
 
-#positive
+@pytest.mark.positive
+@pytest.mark.api
 def test_send_money_success(api_sender, api_receiver, receiver):
     wallets = api_sender.get("/rest/v1/wallets?select=currency,balance_minor&order=created_at.asc").json()
     funded = [w for w in wallets if w["balance_minor"] >= config.AMOUNT_TO_SEND]
@@ -78,7 +87,7 @@ def test_send_money_success(api_sender, api_receiver, receiver):
 
     assert transaction["status"] == "completed"
 
-    
+
     sender_after = get_balance(api_sender, wallet["currency"])
     receiver_after = get_balance(api_receiver, receiver_currency)
     print("\nSender balance AFTER transfer:  ", sender_after, wallet["currency"],
@@ -110,7 +119,8 @@ def test_send_money_success(api_sender, api_receiver, receiver):
     assert notifications[0]["currency"] == receiver_currency
 
 
-# negtive
+@pytest.mark.negative
+@pytest.mark.api
 def test_lookup_recipient_self(api_sender):
     response = rpc(api_sender, "lookup_recipient", {"p_email": config.EMAIL_YAEL})
     assert response.status == 200
@@ -121,7 +131,8 @@ def test_lookup_recipient_self(api_sender):
     assert result["status"] == "self"
     assert result["user_id"] is None
 
-# negtive
+@pytest.mark.negative
+@pytest.mark.api
 def test_lookup_recipient_not_registered(api_sender):
     response = rpc(api_sender, "lookup_recipient", {"p_email": config.NOT_REGISTERED_EMAIL})
     assert response.status == 200
@@ -132,7 +143,8 @@ def test_lookup_recipient_not_registered(api_sender):
     assert result["status"] == "not_found"
     assert result["user_id"] is None
 
-# negtive
+@pytest.mark.negative
+@pytest.mark.api
 def test_lookup_recipient_invalid_email(api_sender):
     response = rpc(api_sender, "lookup_recipient", {"p_email": "not-an-email"})
     print("\nInvalid email lookup response:", response.status, response.text())
@@ -141,7 +153,8 @@ def test_lookup_recipient_invalid_email(api_sender):
     assert response.json()["message"].startswith("INVALID_EMAIL")
 
 
-# negtive
+@pytest.mark.negative
+@pytest.mark.api
 def test_quote_insufficient_funds(api_sender, receiver):
     # Step 1: choose a wallet (the first one the sender opened)
     wallets = api_sender.get(

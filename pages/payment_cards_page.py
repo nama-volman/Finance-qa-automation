@@ -1,8 +1,10 @@
 
 import re
 
-from playwright.sync_api import Locator, Page ,expect
+from playwright.sync_api import Locator, Page, expect
+
 from pages.base_dummy_pay import BaseDummyPayPage
+
 
 class PaymentCardsPage(BaseDummyPayPage):
 
@@ -28,7 +30,7 @@ class PaymentCardsPage(BaseDummyPayPage):
     @property  # כל הכרטיסים ברשימה
     def card_items(self) -> Locator:
         return self.page.get_by_test_id("card-item")
-    
+
     # מוצאת כרטיס לפי 3 הפרטים שמוצגים עליו: 4 ספרות אחרונות, שם בעל הכרטיס ותוקף
     def find_card(self, last4: str, holder: str, expiry: str) -> Locator:
         return (self.card_items
@@ -85,9 +87,9 @@ class PaymentCardsPage(BaseDummyPayPage):
     @property
     def  invalid_expiry_date_message(self)-> Locator:
         return self.add_card_dialog.get_by_text("This card has expired.")
-    
 
-   
+
+
     # ---------- Actions ----------
 
     def click_add_card(self) -> None:

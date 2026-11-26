@@ -1,6 +1,8 @@
 
-from playwright.sync_api import Locator, Page ,expect
+from playwright.sync_api import Locator, Page
+
 from pages.base_dummy_pay import BaseDummyPayPage
+
 
 class ForgotPasswordPage(BaseDummyPayPage):
     PATH = "/forgot-password"

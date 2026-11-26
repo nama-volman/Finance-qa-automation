@@ -1,13 +1,13 @@
 import re
 
-from pages.login_page import LoginPage
-from playwright.sync_api import expect
 import pytest
+from playwright.sync_api import expect
 
 from utilities import navbar_options as navbar
 from utilities.config import URL_FINANCE_SITE
 
 
+@pytest.mark.positive
 @pytest.mark.login
 def test_sign_out_returns_to_login_page(logged_in):
     logged_in.sign_out()
@@ -15,6 +15,7 @@ def test_sign_out_returns_to_login_page(logged_in):
     expect(logged_in.sing_in_btn).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.login
 def test_sign_out_from_inner_page(logged_in):
     logged_in.navigate_to(navbar.WALLETS)
@@ -22,6 +23,7 @@ def test_sign_out_from_inner_page(logged_in):
     expect(logged_in.page).to_have_url(re.compile(r"/login$"))
 
 
+@pytest.mark.negative
 @pytest.mark.login
 def test_protected_page_is_blocked_after_sign_out(logged_in):
     logged_in.sign_out()
@@ -34,6 +36,7 @@ def test_protected_page_is_blocked_after_sign_out(logged_in):
 
 
 
+@pytest.mark.positive
 @pytest.mark.login
 def test_can_sign_in_again_after_sign_out(logged_in):
     logged_in.sign_out()

@@ -1,10 +1,9 @@
 
-from pages.notifications_page import NotificationsPage
-from pages.login_page import LoginPage
-from playwright.sync_api import Page, expect
 import pytest
+from playwright.sync_api import expect
 
 
+@pytest.mark.positive
 @pytest.mark.smoke
 def test_notifications_page_is_displayed(notifications_page):
     expect(notifications_page.notifications_title).to_be_visible()
@@ -13,6 +12,7 @@ def test_notifications_page_is_displayed(notifications_page):
     expect(notifications_page.unread_radio).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_switch_between_all_and_unread(notifications_page):
     notifications_page.show_unread()

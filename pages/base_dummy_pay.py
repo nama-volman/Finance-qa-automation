@@ -1,8 +1,8 @@
-from enum import Enum
 import re
 
+from playwright.sync_api import Locator, Page, expect
+
 from pages.base_page import BasePage
-from playwright.sync_api import Locator, Page ,expect
 from utilities import config
 from utilities.config import EMAIL_YAEL, PASSWORD_YAEL
 from utilities.navbar_options import NAV_PAGES_0PTIONS
@@ -16,7 +16,7 @@ class BaseDummyPayPage(BasePage):
     PATH = config.URL_FINANCE_SITE
 
     def __init__(self, page: Page) -> None:
-        super().__init__(page) 
+        super().__init__(page)
 
     @property
     def email_input(self) -> Locator:
@@ -94,7 +94,7 @@ class BaseDummyPayPage(BasePage):
         # Verify we landed on the right page
         path = NAV_PAGES_0PTIONS[menu_item]
         expect(self.page).to_have_url(re.compile(re.escape(path) + "$"))
-    
+
 
 
     def login_with_valid_credentials(self) -> None:

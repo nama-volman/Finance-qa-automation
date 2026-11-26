@@ -1,18 +1,17 @@
 import re
 
-from pages.dashboard_page import DashboardPage
-from pages.login_page import LoginPage
-from playwright.sync_api import Page, expect
 import pytest
+from playwright.sync_api import expect
 
 
-
+@pytest.mark.positive
 @pytest.mark.smoke
 def test_show_deshbord(dashboard_page):
     dashboard_page.dashboard_title.highlight()
     expect(dashboard_page.dashboard_title).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.smoke
 def test_dashboard_sections_are_displayed(dashboard_page):
     expect(dashboard_page.welcome_text).to_be_visible()
@@ -23,6 +22,7 @@ def test_dashboard_sections_are_displayed(dashboard_page):
     expect(dashboard_page.exchange_rates_title).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_send_money_button_opens_send_money_page(dashboard_page):
     dashboard_page.click_send_money()
@@ -30,6 +30,7 @@ def test_send_money_button_opens_send_money_page(dashboard_page):
     expect(dashboard_page.page_heading("Send Money")).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_view_all_transactions_opens_history_page(dashboard_page):
     dashboard_page.click_view_all_transactions()
@@ -37,6 +38,7 @@ def test_view_all_transactions_opens_history_page(dashboard_page):
     expect(dashboard_page.page_heading("Transaction History")).to_be_visible()
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_view_all_notifications_opens_notifications_page(dashboard_page):
     dashboard_page.click_view_all_notifications()
@@ -46,6 +48,7 @@ def test_view_all_notifications_opens_notifications_page(dashboard_page):
 
 # ==================== Total balance ====================
 # ** בפונקציה הפנימית בצענו הוספה של 1 לסכום של כלל הארנקים כדי לבדוק שבדיקת הסטייה לא מגזימה ואז מחקנו את זה כי זאת בדיקה פנימית שהפונקציה ממומשת נכון.
+@pytest.mark.positive
 @pytest.mark.dashboard
 def test_total_balance_equals_sum_of_wallets(dashboard_page):
     # Arrange - collect the data shown on the page
@@ -68,12 +71,14 @@ def test_total_balance_equals_sum_of_wallets(dashboard_page):
     )
 
 
+@pytest.mark.positive
 @pytest.mark.dashboard
 def test_wallet_count_matches_summary(dashboard_page):
     wallets = dashboard_page.get_wallet_balances()
     assert dashboard_page.get_wallet_count_from_summary() == len(wallets)
 
 
+@pytest.mark.positive
 @pytest.mark.dashboard
 def test_preferred_wallet_matches_summary_currency(dashboard_page):
     dashboard_page.get_wallet_balances()   # wait for the wallets to load

@@ -1,25 +1,22 @@
 
-from api.base_api import rpc
-from pages.base_dummy_pay import BaseDummyPayPage
 import pytest
 from playwright.sync_api import Page, expect
 
-from pages.login_page import LoginPage
-from pages.forgot_password_page import ForgotPasswordPage
+from api.auth_api import create_api_context, get_token
+from api.base_api import rpc
+from pages.bank_accounts_page import BankAccountsPage
+from pages.base_dummy_pay import BaseDummyPayPage
 from pages.dashboard_page import DashboardPage
-from pages.wallets_page import WalletsPage
+from pages.forgot_password_page import ForgotPasswordPage
+from pages.login_page import LoginPage
+from pages.notifications_page import NotificationsPage
+from pages.payment_cards_page import PaymentCardsPage
+from pages.profile_settings_page import ProfileSettingsPage
 from pages.send_money_page import SendMoneyPage
 from pages.transaction_history_page import TransactionHistoryPage
-from pages.payment_cards_page import PaymentCardsPage
-from pages.bank_accounts_page import BankAccountsPage
-from pages.notifications_page import NotificationsPage
-from pages.profile_settings_page import ProfileSettingsPage
+from pages.wallets_page import WalletsPage
 from utilities import config
 from utilities import navbar_options as navbar
-
-from api.auth_api import get_token, create_api_context
-
-
 
 expect.set_options(timeout=config.DEFAULT_TIMEOUT_MS)
 

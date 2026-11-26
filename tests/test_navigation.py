@@ -1,12 +1,13 @@
 import re
 
-from playwright.sync_api import expect
 import pytest
+from playwright.sync_api import expect
 
-from utilities.navbar_options import NAV_PAGES_0PTIONS
 from utilities.config import EMAIL_YAEL
+from utilities.navbar_options import NAV_PAGES_0PTIONS
 
 
+@pytest.mark.positive
 @pytest.mark.navigation
 @pytest.mark.parametrize("menu_item", NAV_PAGES_0PTIONS.keys())
 def test_sidebar_link_opens_correct_page(logged_in, menu_item):
@@ -16,6 +17,7 @@ def test_sidebar_link_opens_correct_page(logged_in, menu_item):
 
 # בדיקה: לחיצה על כפתור החשבון (בתחתית הסרגל) פותחת תפריט
 # עם המייל של המשתמשת, ועם האפשרויות Profile & Settings ו-Sign out
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_account_menu_opens_with_options(logged_in):
     logged_in.open_account_menu()
@@ -27,6 +29,7 @@ def test_account_menu_opens_with_options(logged_in):
 
 
 # בדיקה: לחיצה על Profile & Settings בתפריט מעבירה לדף ההגדרות
+@pytest.mark.positive
 @pytest.mark.navigation
 def test_account_menu_opens_profile_settings(logged_in):
     logged_in.go_to_profile_from_account_menu()
