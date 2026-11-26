@@ -30,7 +30,6 @@ def test_click_transaction_opens_details_dialog(transaction_history_page):
 @pytest.mark.negative
 @pytest.mark.historyFilters
 def test_future_from_date_shows_no_results(transaction_history_page):
-    transaction_history_page.page.pause()
     transaction_history_page.wait_for_list_loaded()
     transaction_history_page.set_date_range(HISTORY_FILTERS["future_date"])
 
@@ -40,7 +39,6 @@ def test_future_from_date_shows_no_results(transaction_history_page):
 @pytest.mark.negative
 @pytest.mark.historyFilters
 def test_from_after_to_shows_no_results(transaction_history_page):
-    transaction_history_page.page.pause()
     transaction_history_page.wait_for_list_loaded()
     transaction_history_page.set_date_range(HISTORY_FILTERS["later_date"],
                                             HISTORY_FILTERS["day_with_two_transactions"])
@@ -51,7 +49,6 @@ def test_from_after_to_shows_no_results(transaction_history_page):
 @pytest.mark.positive
 @pytest.mark.historyFilters
 def test_filter_by_currency_shows_only_that_currency(transaction_history_page):
-    transaction_history_page.page.pause()
     transaction_history_page.wait_for_list_loaded()
     transaction_history_page.select_currency(HISTORY_FILTERS["currency"])
 
@@ -61,7 +58,6 @@ def test_filter_by_currency_shows_only_that_currency(transaction_history_page):
 @pytest.mark.positive
 @pytest.mark.historyFilters
 def test_filter_by_type_shows_only_that_type(transaction_history_page):
-    transaction_history_page.page.pause()
     transaction_history_page.wait_for_list_loaded()
     transaction_history_page.select_type(HISTORY_FILTERS["type"])
 
@@ -74,7 +70,6 @@ def test_filter_by_type_shows_only_that_type(transaction_history_page):
                    reason="BUG: Clear resets Type but Currency keeps the old value; "
                           "there is also no 'All currencies' option")
 def test_clear_resets_all_filters(transaction_history_page):
-    transaction_history_page.page.pause()
     transaction_history_page.wait_for_list_loaded()
     transaction_history_page.select_currency(HISTORY_FILTERS["currency"])
     transaction_history_page.select_type(HISTORY_FILTERS["type"])

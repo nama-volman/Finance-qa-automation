@@ -109,3 +109,51 @@ def test_delete_bank_account(bank_accounts_page):
         if account.count() > accounts_before:
             bank_accounts_page.delete_bank_account(bank_name, last4)
 
+
+# בדיקה: אסור להוסיף פעמיים חשבון בנק זהה לחלוטין. האתר כן מאפשר - זה באג (BUG-02 ב-STD)
+@pytest.mark.negative
+@pytest.mark.bankAccounts
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="BUG: the site allows adding the exact same bank account twice")
+def test_cannot_add_duplicate_bank_account(bank_accounts_page):
+    details = BANK_ACCOUNT_DETAILS
+    bank_name = details["bank_name"]
+    last4 = details["valid_account_number"][-4:]          # "5678"
+    account = bank_accounts_page.find_bank_account(bank_name, last4)
+
+    # Arrange: מחכים שהרשימה תיטען, וסופרים כמה חשבונות תואמים יש
+    expect(bank_accounts_page.bank_account_items.first.or_(bank_accounts_page.empty_state_text)).to_be_visible()
+    accounts_before = account.count()
+
+    accounts_added = 0   # כמה חשבונות השרת באמת הוסיף - כדי לדעת כמה למחוק בסוף
+
+    try:
+        # Act: מוסיפים חשבון, ואז מנסים להוסיף את אותו חשבון בדיוק פעם נוספת
+        bank_accounts_page.add_bank_account(details["holder_name"], bank_name, details["country"],
+                                            details["currency"], details["valid_account_number"])
+        expect(account).to_have_count(accounts_before + 1)    # החשבון הראשון נוסף
+        accounts_added = 1
+
+        with bank_accounts_page.page.expect_response("**/add-bank-account") as server_answer:
+            bank_accounts_page.add_bank_account(details["holder_name"], bank_name, details["country"],
+                                                details["currency"], details["valid_account_number"])
+        if server_answer.value.ok:
+            accounts_added = 2
+
+        # Assert: השרת צריך לדחות את החשבון הכפול (בפועל הוא מאשר - זה הבאג)
+        assert not server_answer.value.ok, "BUG: the duplicate bank account was accepted by the server"
+        expect(account).to_have_count(accounts_before + 1)    # ונשאר רק חשבון אחד חדש ברשימה
+
+    finally:
+        # Cleanup: סוגרים את חלון ההוספה אם נשאר פתוח, ומוחקים את כל החשבונות שהטסט הוסיף.
+        # מחכים עד 3 שניות שהחלון ייסגר לבד (אנימציית סגירה), ורק אם הוא עדיין פתוח - לוחצים Cancel.
+        try:
+            expect(bank_accounts_page.add_bank_account_dialog).to_be_hidden(timeout=3000)
+        except AssertionError:
+            bank_accounts_page.cancel_dialog()
+        expect(account).to_have_count(accounts_before + accounts_added)
+        for _ in range(accounts_added):
+            remaining = account.count()
+            bank_accounts_page.delete_bank_account(bank_name, last4)
+            expect(account).to_have_count(remaining - 1)
+

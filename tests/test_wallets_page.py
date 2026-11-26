@@ -45,16 +45,31 @@ def test_add_wallet_opens_and_cancel_closes_dialog(wallets_page):
     expect(wallets_page.add_wallet_dialog).to_be_hidden()
 
 
-# בדיקה: כשיש 4 ארנקים (אחד לכל מטבע) - הכפתור Add wallet לא לחיץ.
-# אם יש פחות מ-4 ארנקים - הטסט מדולג (את המצב הזה בודק הטסט החיובי).
-@pytest.mark.negative
+# בדיקה: יש 4 ארנקים -> הכפתור Add wallet לא לחיץ.
+#        יש פחות מ-4   -> מוסיפים ארנק במטבע שעוד לא קיים, ובודקים שהוא נוסף.
+@pytest.mark.positive
 @pytest.mark.wallets
-def test_add_wallet_disabled_when_max_wallets(wallets_page):
-    expect(wallets_page.wallet_cards.first).to_be_visible()      # מחכים שהארנקים ייטענו
-    if wallets_page.wallet_cards.count() < MAX_WALLETS:
-        pytest.skip("The account has less than 4 wallets - Add wallet is enabled")
+def test_add_wallet(wallets_page):
+    expect(wallets_page.wallet_cards.first).to_be_visible()     # מחכים שהארנקים ייטענו
+    existing = wallets_page.get_wallet_currencies()             # ["ILS", "EUR"]
+    print("\nWallets before:", existing)
 
-    expect(wallets_page.add_wallet_btn).to_be_disabled()
+    if len(existing) >= MAX_WALLETS:
+        # מצב 1: יש ארנק לכל מטבע - אי אפשר להוסיף עוד
+        expect(wallets_page.add_wallet_btn).to_be_disabled()
+        return
+
+    # מצב 2: יש מקום - מוסיפים את המטבע הראשון שעוד אין לו ארנק
+    new_currency = [c for c in CURRENCIES if c not in existing][0]
+    wallets_page.add_wallet(new_currency)
+
+    expect(wallets_page.add_wallet_dialog).to_be_hidden()
+    expect(wallets_page.wallet_cards).to_have_count(len(existing) + 1)
+    expect(wallets_page.page.get_by_test_id(f"wallet-{new_currency}")).to_be_visible()
+
+    # אם עכשיו הגענו ל-4 - הכפתור צריך להפוך ללא לחיץ
+    if len(existing) + 1 == MAX_WALLETS:
+        expect(wallets_page.add_wallet_btn).to_be_disabled()
 
 
 # ==================== Conversion calculator ====================

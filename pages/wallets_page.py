@@ -115,6 +115,17 @@ class WalletsPage(BaseDummyPayPage):
     def click_swap(self) -> None:
         self.swap_btn.click()
 
+    def get_wallet_currencies(self) -> list[str]:
+        # ["ILS", "EUR"] from data-testid="wallet-ILS", "wallet-EUR"
+        return [card.get_attribute("data-testid").removeprefix("wallet-")
+                for card in self.wallet_cards.all()]
+
+    def add_wallet(self, currency: str) -> None:
+        self.click_add_wallet()
+        self.select_option(self.dialog_currency_select, currency)
+        self.dialog_add_btn.click()
+
+
     # ---------- Conversion calculator ----------
     # How the site works: after we type an amount and choose currencies, the site
     # waits a moment, sends a request to the server ("preview_conversion"),

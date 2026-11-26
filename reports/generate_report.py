@@ -41,17 +41,17 @@ JOURNEY = [
         ("test_dashboard_page", "Dashboard",
          "Total balance equals the sum of all wallets; wallet count and preferred currency match."),
         ("test_notifications_page", "Notifications",
-         "Page loads and switches between All and Unread."),
+         "Page loads, switches All/Unread; Mark read lowers the unread list by 1 and Mark all as read empties it."),
     ]),
     ("Money movement", [
         ("test_wallets_page", "Wallets & conversion",
-         "Currency calculator converts both ways for every currency and rejects bad amounts."),
+         "Adds a wallet in a missing currency (Add wallet is disabled at 4); calculator converts both ways and rejects bad amounts."),
         ("test_send_money_page", "Send money (UI)",
          "Recipient step opens, Continue moves to the amount step and Back returns."),
         ("test_send_money_api", "Send money (API)",
-         "A real transfer through the backend: balances, history and notification all update."),
+         "A real transfer through the backend: balances, history, notification and the dashboard Total balance all update."),
         ("test_transaction_history_page", "Transaction history",
-         "Date, currency and type filters narrow the list; details open on click."),
+         "Date, currency and type filters narrow the list; details open on click; Clear bug documented."),
     ]),
     ("Payment methods", [
         ("test_payment_cards_page", "Payment cards",
@@ -75,11 +75,12 @@ API_STEPS = [
     ("Balances", "Sender -amount, receiver +converted amount"),
     ("History", "Transfer appears in receiver's list"),
     ("Notify", "One payment_received notification"),
+    ("UI", "Sender's dashboard Total balance drops by the amount"),
 ]
 
 # The area markers from pytest.ini (every test has positive/negative + exactly one of these)
 AREAS = ["smoke", "navigation", "login", "dashboard", "wallets", "historyFilters",
-         "cards", "bankAccounts", "profile", "api"]
+         "cards", "bankAccounts", "profile", "notifications", "api"]
 
 
 # ---------------------------------------------------------------------------
@@ -526,7 +527,7 @@ h2{font-size:1.22rem;font-weight:700}
 .chip-xfail{background:var(--xfail-soft);color:var(--xfail)} .chip-failed{background:var(--fail-soft);color:var(--fail)}
 /* api */
 .api-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center}
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;counter-reset:s}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;counter-reset:s}
 .steps li{position:relative;background:var(--accent-soft);border-radius:8px;padding:12px 10px;display:flex;flex-direction:column;gap:4px}
 .steps li:not(:last-child)::after{content:"";position:absolute;right:-7px;top:50%;width:6px;height:6px;border-top:2px solid var(--accent);border-right:2px solid var(--accent);transform:translateY(-50%) rotate(45deg)}
 .steps .n{font:600 .7rem var(--f-mono);color:var(--accent)}
